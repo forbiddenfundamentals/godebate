@@ -17,13 +17,11 @@ class Game(Document):
     place = StringField()  # TODO replace with Place reference field if necessary
     resolution = StringField()  # TODO the same here
 
+    judges = EmbeddedDocumentListField(Judge)
+    watchers = ListField(ReferenceField(User))
+
     @classmethod
     def create(cls, author, name):
         game = cls(name=name, author=author)
         game.schema = BPFSchema.create()
         return game
-
-    wait_list = ListField(User)
-
-    judges = EmbeddedDocumentListField(Judge)
-    watchers = ListField(ReferenceField(User))
