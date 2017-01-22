@@ -1,8 +1,6 @@
 from functools import wraps
-
-from flask import jsonify, Blueprint, request
-
-from model.user import User
+from flask import jsonify, Blueprint
+from .utils import crossdomain
 
 
 class ApiBlueprint(Blueprint):
@@ -11,7 +9,7 @@ class ApiBlueprint(Blueprint):
         super_route = super().route
 
         def decorator(func):
-            return super_route(rule, **options)(self.json_response(func))
+            return super_route(rule, **options)(crossdomain('*')(self.json_response(func)))
         return decorator
 
     @staticmethod
@@ -24,17 +22,6 @@ class ApiBlueprint(Blueprint):
 api = ApiBlueprint("api", __name__)
 
 
-@api.route('/register/', methods=['POST'])
-def register():
-    return {'key': User(username="lol", password="qwerty")}
-
-
-@api.route('/authenticate/', methods=['POST'])
+@api.route('/authenticate', methods=['POST'])
 def authenticate():
-    device_id, device_key = request.json['device_id'], request.json['device_key']
-    return {'token': Device.generate_token(device_id, device_key)}
-
-
-@api.route('/me/')
-def me_info(device):
-    return device.get_info()
+    return {'token': "lol"}
