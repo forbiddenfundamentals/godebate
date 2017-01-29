@@ -2,11 +2,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import *
 from .exceptions import AuthenticationFailure
+from .session import Session
 
 
 class User(Document):
 
-    username = StringField()
+    username = StringField(unique=True)
     pw_hash = StringField()
     vk_id = StringField()
 
@@ -23,5 +24,8 @@ class User(Document):
     def login(cls, username, password):
         user = cls.get(username)
         if user and check_password_hash(user.pw_hash, password):
-            return user
+            return user.make_session()
         raise AuthenticationFailure
+
+    def make_session(self):
+        return Session.create(self)

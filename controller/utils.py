@@ -1,6 +1,10 @@
 from datetime import timedelta
+from functools import wraps
 from flask import make_response, request, current_app
 from functools import update_wrapper
+
+from model.session import Session
+from model.exceptions import AccessDenied
 
 
 def crossdomain(origin=None, methods=None, headers=None,
@@ -42,4 +46,22 @@ def crossdomain(origin=None, methods=None, headers=None,
 
         f.provide_automatic_options = False
         return update_wrapper(wrapped_function, f)
+    return decorator
+
+
+def authentication_required(provide_user=True, provide_session=False):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            token = request.headers.get('Authorization')
+            if token:
+                user_session = Session.find_one_by_text_token(token)
+                if user_session:
+                    if provide_user:
+                        kwargs['user'] = user_session.user
+                    if provide_session:
+                        kwargs['session'] = user_session
+                    return func(*args, **kwargs)
+            raise AccessDenied
+        return wrapper
     return decorator

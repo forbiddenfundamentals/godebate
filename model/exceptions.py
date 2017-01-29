@@ -15,3 +15,7 @@ class AuthenticationFailure(AccessException):
 
 class AccessDenied(AccessException):
     pass
+
+
+class BadSession(AccessException):
+    pass
